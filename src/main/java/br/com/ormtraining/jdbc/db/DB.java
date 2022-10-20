@@ -2,6 +2,7 @@ package br.com.ormtraining.jdbc.db;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -9,23 +10,11 @@ import java.util.Properties;
 
 public class DB {
 
-    private static Connection conn = null;
+    private static Connection conn;
 
-    public static Connection getConnection() {
-        if (conn == null) {
-            try {
-                Properties props = loadProperties();
-                String url = props.getProperty("dburl");
-                conn = DriverManager.getConnection(url, props);
-            } catch (SQLException e) {
-                throw new DbException(e.getMessage());
-            }
-        }
-        return conn;
-    }
 
     private static Properties loadProperties() {
-        try (FileInputStream fs = new FileInputStream("application.yml")) {
+        try (FileInputStream fs = new FileInputStream("db.properties")) {
             Properties props = new Properties();
             props.load(fs);
             return props;
@@ -34,14 +23,38 @@ public class DB {
         }
     }
 
-    public static void closeConnection() {
-        if (conn != null) {
+    public static Connection getConnection() {
+        if (conn == null) {
             try {
-                conn.close();
-            } catch (SQLException e) {
-                throw new DbException(e.getMessage());
+                Properties props = loadProperties();
+                final InputStream fis = DB.class.getResourceAsStream("/properties/conexao.propertie");
+                {
+                    try {
+                        props.load(fis);
+
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    try {
+                        conn = DriverManager.getConnection(String.valueOf(fis), props);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                return conn;
+            } catch (RuntimeException e) {
+                throw new RuntimeException(e);
+            }
+
+            public static void closeConnection() {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        throw new DbException(e.getMessage());
+                    }
+                }
             }
         }
     }
 }
-
