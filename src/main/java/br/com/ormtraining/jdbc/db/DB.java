@@ -45,15 +45,15 @@ public class DB {
             } catch (RuntimeException e) {
                 throw new RuntimeException(e);
             }
-
-            public static void closeConnection() {
-                if (conn != null) {
-                    try {
-                        conn.close();
-                    } catch (SQLException e) {
-                        throw new DbException(e.getMessage());
-                    }
-                }
+        }
+        return conn;
+    }
+    public static void closeConnection() {
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                throw new DbException(e.getMessage());
             }
         }
     }
