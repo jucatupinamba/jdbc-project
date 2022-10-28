@@ -15,7 +15,7 @@ public class DB {
 
     private static Properties loadProperties() {
         try {
-            FileInputStream fs = new FileInputStream("db.properties");
+            FileInputStream fs = new FileInputStream("src/main/resources/db.properties");
             Properties props = new Properties();
             props.load(fs);
             return props;
@@ -28,7 +28,9 @@ public class DB {
         if (conn == null) {
             try {
                 Properties props = loadProperties();
-                final InputStream fis = DB.class.getResourceAsStream("/properties/conexao.propertie");
+                String url = props.getProperty("spring.datasource.url");
+                conn = DriverManager.getConnection(url, props);
+                final InputStream fis = DB.class.getResourceAsStream("resources/db.properties");
                 {
                     try {
                         props.load(fis);
@@ -44,6 +46,8 @@ public class DB {
                 }
                 return conn;
             } catch (RuntimeException e) {
+                throw new RuntimeException(e);
+            } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }
